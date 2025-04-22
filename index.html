@@ -2,20 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Real‑Time Weather Widget Demo</title>
+  <title>Dynamic Weather Widget</title>
   <style>
     #weather-widget {
       font-family: sans-serif;
       background: #eef6ff;
       border-radius: 8px;
       padding: 16px;
-      max-width: 240px;
+      max-width: 260px;
       text-align: center;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 12px;
     }
     #weather-widget h4 { margin: 0 0 8px; }
     #weather-widget .temp { font-size: 2em; }
     #weather-widget .desc { text-transform: capitalize; }
+    #controls { display:flex; gap:8px; justify-content:center; }
+    #cityInput { padding:4px; width:140px; }
+    #fetchBtn { padding:4px 8px; cursor:pointer; }
   </style>
 </head>
 <body>
@@ -25,20 +29,49 @@
     <div class="desc" id="desc"></div>
   </div>
 
+  <div id="controls">
+    <input id="cityInput" placeholder="Enter city" />
+    <button id="fetchBtn">Get Weather</button>
+  </div>
+
   <script>
+    // 👉 Replace this with your real API key from https://openweathermap.org/appid
     const apiKey = '57d2ce29c99bb6f1d4a708ebc75ce9ea';
-    const city = 'Lagos';  // change or make dynamic
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('city').textContent = data.name;
-        document.getElementById('temp').innerHTML = Math.round(data.main.temp) + '°C';
-        document.getElementById('desc').textContent = data.weather[0].description;
-      })
-      .catch(err => {
-        document.getElementById('city').textContent = 'Error loading weather';
-        console.error(err);
-      });
+
+    // Fetch weather for a given city
+    function fetchWeather(cityName) {
+      document.getElementById('city').textContent = 'Loading…';
+      fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(cityName)}&units=metric&appid=${apiKey}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById('city').textContent = data.name;
+          document.getElementById('temp').innerHTML = Math.round(data.main.temp) + '°C';
+          document.getElementById('desc').textContent = data.weather[0].description;
+        })
+        .catch(err => {
+          document.getElementById('city').textContent = 'Error loading weather';
+          document.getElementById('temp').textContent = '';
+          document.getElementById('desc').textContent = '';
+          console.error(err);
+        });
+    }
+
+    // On load, grab city from URL (?city=Paris) or default to Lagos
+    window.addEventListener('load', () => {
+      const params = new URLSearchParams(window.location.search);
+      const initCity = params.get('city') || 'Lagos';
+      document.getElementById('cityInput').value = initCity;
+      fetchWeather(initCity);
+    });
+
+    // Button click handler
+    document.getElementById('fetchBtn').addEventListener('click', () => {
+      const chosen = document.getElementById('cityInput').value.trim();
+      if (chosen) fetchWeather(chosen);
+    });
   </script>
 </body>
 </html>
