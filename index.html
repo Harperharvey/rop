@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Real‑Time Weather Widget Demo</title>
+  <style>
+    #weather-widget {
+      font-family: sans-serif;
+      background: #eef6ff;
+      border-radius: 8px;
+      padding: 16px;
+      max-width: 240px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    #weather-widget h4 { margin: 0 0 8px; }
+    #weather-widget .temp { font-size: 2em; }
+    #weather-widget .desc { text-transform: capitalize; }
+  </style>
+</head>
+<body>
+  <div id="weather-widget">
+    <h4 id="city">Loading…</h4>
+    <div class="temp" id="temp"></div>
+    <div class="desc" id="desc"></div>
+  </div>
+
+  <script>
+    const apiKey = 'YOUR_OPENWEATHERMAP_KEY';
+    const city = 'Lagos';  // change or make dynamic
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('city').textContent = data.name;
+        document.getElementById('temp').innerHTML = Math.round(data.main.temp) + '°C';
+        document.getElementById('desc').textContent = data.weather[0].description;
+      })
+      .catch(err => {
+        document.getElementById('city').textContent = 'Error loading weather';
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
